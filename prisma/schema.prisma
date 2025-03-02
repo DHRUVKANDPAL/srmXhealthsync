@@ -1,0 +1,276 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  previewFeatures = ["relationJoins"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Patient {
+  id              String   @id @default(cuid())
+  email           String?  
+  name            String
+  gender          String
+  dob             String
+  aadharno        String @unique
+  bloodgroup      String
+  hashedPassword  String?
+  contactno       String
+  alternatecontactno String?
+  address         String
+  emergencycontact String?
+  prevHis          String?
+  imageUrl         String?
+  isVerified Boolean? @default(false)
+  medHis          MedicalHistory[]
+  session         PatientSession[]
+  transaction Transaction[]
+  // queue Queue[]
+  onlineAppointments OnlineMeet[]
+  offlineAppointments OfflineMeet[]
+  prescriptions Prescription[]
+  proExpiryDate DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+model MedicalHistory{
+  id        String   @id
+  userId    String
+  condition String
+  treatmentdetails String?
+  patient Patient@relation(fields: [userId], references: [id],onDelete: Cascade)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+model PatientSession {
+  id        String   @id
+  userId    String
+  expiresAt DateTime
+  patient Patient @relation(fields: [userId], references: [id],onDelete: Cascade)
+}
+
+model Hospital{
+  id              String   @id @default(cuid())
+  name String
+  imageUrl String?
+  licenceno String
+  estyear Int
+  Website String
+  contactno String
+  alternatecontactno String
+  email String
+  address String
+  City String
+  State String
+  Zipcode String 
+  latitude Float?
+  longitude Float?
+  anyotherdetails String?
+  hashedPassword  String?
+  bedsAvailable Int? @default(0) //single beds
+  opdsAvailable Int? @default(0) // opds
+  icuAvailable Int? @default(0) //icu
+  labsAvailable Int? @default(0) //labs
+  doctorsAvailable Int? @default(0) //doctors 
+  sharedAvailable Int? @default(0) //sharedbeds
+  generalWardAvailable Int? @default(0)
+  idToLogin String @unique
+  isVerified Boolean @default(false)
+  hospitaldep Department[]
+  session HospitalSession[]
+  prescriptions Prescription[]
+  room Room[]
+  roomHistory HospitalRoomHistory[]
+  createdAt       DateTime? @default(now())
+  updatedAt       DateTime? @updatedAt
+  // sumitSati Boolean?
+}
+model Room{
+  id              String   @id @default(cuid())
+  userId String
+  roomno String   
+  isAvailabel Boolean @default(false)
+  typeof String //icu general ward single room shared room 
+  bookedby String? @default("Unbooked")
+  aadhar String?
+  hospital Hospital @relation(fields: [userId], references: [id],onDelete: Cascade)
+  updatedAt       DateTime? @updatedAt
+}
+model HospitalRoomHistory{
+  id              String   @id @default(cuid())
+  userId String
+  roomId String
+  roomno String   
+  typeof String 
+  bookedBy String? @default("Unbooked")
+  aadhar String?
+  bookedAt DateTime 
+  checkout DateTime?
+  hospital Hospital @relation(fields: [userId], references: [id],onDelete: Cascade)
+}
+model Department{
+  id              String   @id @default(cuid())
+  userId String
+  hod String
+  name String
+  doctors DoctorinDept[]
+  hospital Hospital @relation(fields: [userId], references: [id],onDelete: Cascade)
+  createdAt       DateTime? @default(now())
+  updatedAt       DateTime? @updatedAt
+}
+model Doctor{
+  id              String   @id @default(cuid())
+  userId String @unique//unique id to login 
+  name String 
+  imageUrl String?
+  dob DateTime?
+  aadharNo String?
+  licenceNo String @unique 
+  contactno String?
+  email String?
+  ratings Float? @default(3.7)
+  hashedPassword String
+  // queue Queue[]
+  departments DoctorinDept[]
+  prescriptions Prescription[]
+  session DoctorSession[]
+  createdAt       DateTime? @default(now())
+  updatedAt       DateTime? @updatedAt
+}
+model DoctorinDept {
+  dept       Department     @relation(fields: [deptId], references: [id],onDelete: Cascade)
+  deptId     String 
+  doctor     Doctor @relation(fields: [doctorId], references: [id],onDelete: Cascade)
+  doctorId   String 
+  assignedAt DateTime @default(now())
+  isAvailable Boolean? @default(true)
+  consulatationFees Float? @default(500)
+  // onlineAppointments OnlineMeet[] 
+  // offlineAppointments OfflineMeet[]
+  @@id([deptId, doctorId])
+}
+
+model OnlineMeet {
+  id          String   @id @default(cuid())
+  deptId      String
+  doctorId    String
+  patientId   String
+  patient     Patient @relation(fields: [patientId], references: [id],onDelete: Cascade)
+  // doctorInDept DoctorinDept @relation(fields: [deptId, doctorId], references: [deptId, doctorId], onDelete: Cascade)
+  to DateTime
+  from        DateTime
+  isCompleted Boolean? @default(false)
+  createdAt   DateTime? @default(now())
+  updatedAt   DateTime? @updatedAt
+}
+
+model OfflineMeet {
+  id          String   @id @default(cuid())
+  deptId      String
+  doctorId    String
+  patientId   String
+  to DateTime
+  from        DateTime
+  patient     Patient @relation(fields: [patientId], references: [id],onDelete: Cascade)
+  // doctorInDept DoctorinDept @relation(fields: [deptId, doctorId], references: [deptId, doctorId], onDelete: Cascade)
+  prescription Prescription[]
+  createdAt   DateTime? @default(now())
+  updatedAt   DateTime? @updatedAt
+}
+
+
+model Prescription {
+  id          String   @id @default(cuid())
+  meetId      String
+  patientId   String
+  hospitalId  String
+  doctorId    String
+  meet        OfflineMeet @relation(fields: [meetId], references: [id],onDelete: Cascade)
+  hospital    Hospital @relation(fields: [hospitalId], references: [id],onDelete: Cascade)
+  patient     Patient @relation(fields: [patientId], references: [id],onDelete: Cascade)
+  doctor      Doctor @relation(fields: [doctorId], references: [id],onDelete: Cascade)
+  advice_data AdviceData[]
+  previous_reports PreviousReports[]
+  createdAt   DateTime? @default(now())
+  updatedAt   DateTime? @updatedAt
+}
+
+model AdviceData {
+  prescriptionId String @unique
+  name           String// davai 
+  dosage String
+  details String
+  prescription Prescription @relation(fields: [prescriptionId], references: [id],onDelete: Cascade)
+}
+
+model PreviousReports {
+  prescriptionId String @unique
+  date DateTime?
+  prescription Prescription @relation(fields: [prescriptionId], references: [id],onDelete: Cascade)
+}
+
+
+model Transaction {
+    id                String   @id @default(cuid())
+    createdAt         DateTime @default(now())
+    updatedAt         DateTime @updatedAt
+    userId            String
+    orderCreationId   String?
+    razorpayPaymentId String?
+    razorpayOrderId   String?
+    razorpaySignature String?
+    credits           Int
+    user              Patient     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// model Queue{
+//   id              String   @id @default(cuid())
+//   userId String
+//   patientId String
+//   patient Patient@relation(fields: [patientId], references: [id],onDelete: Cascade)
+//   doctor Doctor @relation(fields: [userId], references: [id],onDelete: Cascade)
+//   createdAt       DateTime? @default(now())
+//   updatedAt       DateTime? @updatedAt
+// }
+model HospitalSession {
+  id        String   @id
+  userId    String
+  expiresAt DateTime
+  hospital Hospital @relation(fields: [userId], references: [id],onDelete: Cascade)
+}
+model DoctorSession {
+  id        String   @id
+  userId    String
+  expiresAt DateTime
+  doctor Doctor @relation(fields: [userId], references: [id],onDelete: Cascade)
+}
+
+model Feedback{ 
+  id String @id @default(cuid())
+  name String
+  email String
+  message String
+  subject String?
+  reply Reply[]
+  createdAt       DateTime? @default(now())
+}
+
+model Reply{
+  id String @id @default(cuid())
+  userId String
+  feedback Feedback @relation(fields: [userId], references: [id],onDelete: Cascade)
+  message String
+  createdAt       DateTime? @default(now())
+}
+
+
+
+
