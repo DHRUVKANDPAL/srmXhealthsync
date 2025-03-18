@@ -1,12 +1,13 @@
 # 🩺 HealthSync
 
 <div align="center">
-  <h3>A next-generation healthcare management platform</h3>
-  <p>Streamlining patient-doctor interactions, optimizing hospital operations, and enhancing patient care through AI-driven features.</p>
+  <h3>🚀 A Next-Generation Healthcare Management Platform</h3>
+  <p>
+💡 Revolutionizing patient-doctor interactions, 🏥 optimizing hospital operations, and ❤️ enhancing patient care through AI-powered intelligence.
+</p>
   
   [![Built with Next.js](https://img.shields.io/badge/Built%20with-Next.js-black?style=flat-square&logo=next.js)](https://nextjs.org/)
-  [![TypeScript](https://img.shields.io/badge/TypeScript-blue?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
-  [![UI: ShadCN](https://img.shields.io/badge/UI-ShadCN-black?style=flat-square)](https://ui.shadcn.com/)
+
  
 </div>
 
@@ -156,10 +157,10 @@ Hospital room and bed availability management dashboard
 | *Frontend* | Next.js, TypeScript, ShadCN UI |
 | *UI/UX* | Framer Motion, Lucide React |
 | *Backend* | Node.js, Express.js |
-| *Database* | MongoDB, Redis |
-| *Authentication* | NextAuth.js, JWT |
-| *AI/ML* | TensorFlow.js, OpenAI API |
-| *DevOps* | Docker, GitHub Actions, Vercel |
+| *Database* | PostGreSql |
+| *Authentication* | Lucia-Auth |
+| *AI/ML* | Gemini API, Python |
+| *DevOps* | Vercel |
 
 ---
 
