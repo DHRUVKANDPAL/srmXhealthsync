@@ -188,7 +188,7 @@ export default function DoctorBillingPage({searchParams:{hospitalKey,hospitalNam
     try {
       const orderId: string = await createOrderId();
       const options = {
-        key: process.env.key_id,
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
         amount: fees * 100,
         currency: "INR",
         name: "HealthSync Patient ",
@@ -210,19 +210,22 @@ export default function DoctorBillingPage({searchParams:{hospitalKey,hospitalNam
           const res = await result.json();
           if (res.isOk) {
             // alert("payment succeed");
-            const result = await fetch("/api/billing/updateOfflineTransaction", {
-              method: "POST",
-              body: JSON.stringify({
-                data,
-                amount: fees,
-                patientId: patient.id,
-                doctorId: doctor.id,
-                to: timeSlot?.end,
-                from: timeSlot?.start,
-                depId: deptId,
-              }),
-              headers: { "Content-Type": "application/json" },
-            });
+            const result = await fetch(
+              "/api/billing/updateOfflineTransaction",
+              {
+                method: "POST",
+                body: JSON.stringify({
+                  data,
+                  amount: fees,
+                  patientId: patient.id,
+                  doctorId: doctor.id,
+                  to: timeSlot?.end,
+                  from: timeSlot?.start,
+                  depId: deptId,
+                }),
+                headers: { "Content-Type": "application/json" },
+              }
+            );
             toast.success("Payment success");
           } else {
             alert(res.message);

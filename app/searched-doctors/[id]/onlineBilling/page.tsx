@@ -141,7 +141,7 @@ export default function DoctorBillingPage() {
     try {
       const orderId: string = await createOrderId();
       const options = {
-        key: process.env.key_id,
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
         amount: doctor.consultationFee * 100,
         currency: "INR",
         name: "HealthSync Patient ",
